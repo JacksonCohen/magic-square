@@ -1,15 +1,19 @@
-import { type ReactElement, useEffect, useState } from 'react';
-import Piece, { type PieceType, type PieceRecord } from './piece';
+import { useEffect, useState } from 'react';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { canMove, isLocation, isEqualCoord, isPieceType } from '../utils';
 import { SHAPES } from '../data';
-import Square, { type Coords } from './square';
+import Piece from './piece';
+import Square from './square';
+
+import { type ReactElement } from 'react';
+import { type PieceType, type PieceRecord } from './piece';
+import { type Coords } from './square';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function Board() {
-  const [pieces, setPieces] = useState<PieceRecord[]>([]);
+  const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
 
   useEffect(() => {
     return monitorForElements({
@@ -32,18 +36,18 @@ export default function Board() {
           return;
         }
 
-        const piece = pieces.find((p) => isEqualCoord(p.location, sourceLocation));
-        const restOfPieces = pieces.filter((p) => p !== piece);
+        const piece = placedPieces.find((p) => isEqualCoord(p.location, sourceLocation));
+        const restOfPieces = placedPieces.filter((p) => p !== piece);
 
-        if (
-          canMove(sourceLocation, destinationLocation, pieceType, pieces) &&
-          piece !== undefined
-        ) {
-          setPieces([{ type: piece.type, location: destinationLocation }, ...restOfPieces]);
+        if (canMove(sourceLocation, destinationLocation, placedPieces) && piece !== undefined) {
+          setPlacedPieces([
+            { location: destinationLocation, pieceType: piece.pieceType, pattern: piece.pattern },
+            ...restOfPieces,
+          ]);
         }
       },
     });
-  }, [pieces]);
+  }, [placedPieces]);
 
   return (
     <div className='flex gap-5'>
@@ -72,7 +76,7 @@ export default function Board() {
             ))}
           </div>
 
-          <div className='grid grid-cols-6'>{renderGrid(pieces)}</div>
+          <div className='grid grid-cols-6'>{renderGrid(placedPieces)}</div>
         </div>
       </div>
     </div>
@@ -119,17 +123,17 @@ const pieceLookup: {
   ),
 };
 
-function renderGrid(pieces: PieceRecord[]) {
+function renderGrid(placedPieces: PieceRecord[]) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
       const squareCoord: Coords = [[row, col]];
 
-      const piece = pieces.find((piece) => isEqualCoord(piece.location, squareCoord));
+      const piece = placedPieces.find((piece) => isEqualCoord(piece.location, squareCoord));
 
       squares.push(
-        <Square pieces={pieces} location={squareCoord}>
-          {piece && pieceLookup[piece.type](squareCoord)}
+        <Square placedPieces={placedPieces} location={squareCoord}>
+          {piece && pieceLookup[piece.pieceType](squareCoord)}
         </Square>
       );
     }
