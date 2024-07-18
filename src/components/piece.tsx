@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { preventUnhandled } from '@atlaskit/pragmatic-drag-and-drop/prevent-unhandled';
 import invariant from 'tiny-invariant';
 import { type Coords } from './square';
 import { SHAPES } from '../data';
@@ -17,9 +18,9 @@ export type PieceRecord = {
   location: Coords;
 };
 
-export default function Piece({ location, pieceType, pattern }: PieceProps) {
-  console.log({ location, pieceType, pattern });
+// TODO: Add click to rotate (90deg)
 
+export default function Piece({ location, pieceType, pattern }: PieceProps) {
   const ref = useRef(null);
   const [dragging, setDragging] = useState(false);
 
@@ -30,7 +31,10 @@ export default function Piece({ location, pieceType, pattern }: PieceProps) {
     return draggable({
       element: el,
       getInitialData: () => ({ location, pieceType }),
-      onDragStart: () => setDragging(true),
+      onDragStart: () => {
+        preventUnhandled.start();
+        setDragging(true);
+      },
       onDrop: () => setDragging(false),
     });
   }, [location, pieceType]);
