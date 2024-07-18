@@ -2,23 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import invariant from 'tiny-invariant';
 import { type Coords } from './square';
+import { SHAPES } from '../data';
 
 export interface PieceProps {
   location: number[][] | null;
   pieceType: PieceType;
   pattern: number[][];
-}
-
-enum PieceBackgroundColor {
-  'one' = 'bg-red-100',
-  'two' = 'bg-green-100',
-  'three' = 'bg-blue-100',
-  'four' = 'bg-cyan-100',
-  'square' = 'bg-pink-100',
-  'corner' = 'bg-emerald-100',
-  'T' = 'bg-lime-100',
-  'L' = 'bg-purple-100',
-  'Z' = 'bg-orange-100',
 }
 
 export type PieceType = 'one' | 'two' | 'three' | 'four' | 'square' | 'corner' | 'T' | 'L' | 'Z';
@@ -47,11 +36,21 @@ export default function Piece({ location, pieceType, pattern }: PieceProps) {
   }, [location, pieceType]);
 
   return (
-    <div
-      ref={ref}
-      className={`${PieceBackgroundColor[pieceType]} ${dragging ? 'opacity-50' : 'opacity-100'}`}
-    >
-      {pieceType}
+    <div ref={ref} className={`${dragging ? 'opacity-50' : 'opacity-100'}`}>
+      {pattern.map((row, rowIndex) => (
+        <div key={rowIndex} className='flex'>
+          {row.map((cell, cellIndex) => {
+            if (cell === 0) return <div key={cellIndex} className='w-8 h-8'></div>;
+
+            return (
+              <div
+                key={cellIndex}
+                className={`${SHAPES[pieceType].color} w-8 h-8 shadow-inner`}
+              ></div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

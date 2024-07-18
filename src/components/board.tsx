@@ -1,11 +1,70 @@
-import { useEffect, useState } from 'react';
-import Piece, { type PieceRecord } from './piece';
+import { type ReactElement, useEffect, useState } from 'react';
+import Piece, { type PieceType, type PieceRecord } from './piece';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { canMove, isCoord, isEqualCoord, isPieceType } from '../utils';
 import { SHAPES } from '../data';
+import Square, { type Coords } from './square';
 
 // const NUMBERS = [1, 2, 3, 4, 5, 6];
 // const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+const pieceLookup: {
+  [Key in PieceType]: (location: number[][]) => ReactElement;
+} = {
+  one: (location) => (
+    <Piece location={location} pieceType={SHAPES.one.pieceType} pattern={SHAPES.one.pattern} />
+  ),
+  two: (location) => (
+    <Piece location={location} pieceType={SHAPES.two.pieceType} pattern={SHAPES.two.pattern} />
+  ),
+  three: (location) => (
+    <Piece location={location} pieceType={SHAPES.three.pieceType} pattern={SHAPES.three.pattern} />
+  ),
+  four: (location) => (
+    <Piece location={location} pieceType={SHAPES.four.pieceType} pattern={SHAPES.four.pattern} />
+  ),
+  square: (location) => (
+    <Piece
+      location={location}
+      pieceType={SHAPES.square.pieceType}
+      pattern={SHAPES.square.pattern}
+    />
+  ),
+  corner: (location) => (
+    <Piece
+      location={location}
+      pieceType={SHAPES.corner.pieceType}
+      pattern={SHAPES.corner.pattern}
+    />
+  ),
+  T: (location) => (
+    <Piece location={location} pieceType={SHAPES.T.pieceType} pattern={SHAPES.T.pattern} />
+  ),
+  L: (location) => (
+    <Piece location={location} pieceType={SHAPES.L.pieceType} pattern={SHAPES.L.pattern} />
+  ),
+  Z: (location) => (
+    <Piece location={location} pieceType={SHAPES.Z.pieceType} pattern={SHAPES.Z.pattern} />
+  ),
+};
+
+function renderGrid(pieces: PieceRecord[]) {
+  const squares = [];
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const squareCoord: Coords = [[row, col]];
+
+      const piece = pieces.find((piece) => isEqualCoord(piece.location, squareCoord));
+
+      squares.push(
+        <Square pieces={pieces} location={squareCoord}>
+          {piece && pieceLookup[piece.type](squareCoord)}
+        </Square>
+      );
+    }
+  }
+  return squares;
+}
 
 export default function Board() {
   const [pieces, setPieces] = useState<PieceRecord[]>([]);
@@ -40,48 +99,15 @@ export default function Board() {
 
   return (
     <div className='flex gap-5'>
-      <div className='flex gap-2 p-5 border border-gray-200'>
+      <div className='flex flex-col gap-3 p-5 border border-gray-200'>
         {Object.values(SHAPES).map((shape) => {
           return <Piece location={null} pieceType={shape.pieceType} pattern={shape.pattern} />;
         })}
       </div>
+
+      <div className='grid grid-cols-6 grid-rows-6 w-[500px] h-[500px] border-3 border-gray-300'>
+        {renderGrid(pieces)}
+      </div>
     </div>
   );
-}
-
-{
-  /* <table>
-        <thead>
-          <tr>
-            <th className='w-12 h-12'></th>
-            {NUMBERS.map((number) => (
-              <th key={number} className='font-normal'>
-                {number}
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-          {grid.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              <td>{LETTERS[rowIndex]}</td>
-              {row.map((cell, index) => (
-                <td
-                  key={index}
-                  className='w-12 h-12 border-b border-black border-l last:border-r [&:not(:first-child)]:border-t'
-                >
-                  {cell && (
-                    <div
-                      className={`w-12 h-12 ${SHAPES[cell].color} flex items-center justify-center`}
-                    >
-                      {cell}
-                    </div>
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table> */
 }
