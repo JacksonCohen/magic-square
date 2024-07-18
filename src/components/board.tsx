@@ -1,12 +1,83 @@
 import { type ReactElement, useEffect, useState } from 'react';
 import Piece, { type PieceType, type PieceRecord } from './piece';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { canMove, isCoord, isEqualCoord, isPieceType } from '../utils';
+import { canMove, isLocation, isEqualCoord, isPieceType } from '../utils';
 import { SHAPES } from '../data';
 import Square, { type Coords } from './square';
 
-// const NUMBERS = [1, 2, 3, 4, 5, 6];
-// const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const NUMBERS = [1, 2, 3, 4, 5, 6];
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+export default function Board() {
+  const [pieces, setPieces] = useState<PieceRecord[]>([]);
+
+  useEffect(() => {
+    return monitorForElements({
+      onDrop({ source, location }) {
+        const destination = location.current.dropTargets[0];
+
+        if (!destination) {
+          return;
+        }
+
+        const destinationLocation = destination.data.location;
+        const sourceLocation = source.data.location;
+        const pieceType = source.data.pieceType;
+
+        if (
+          !isLocation(destinationLocation) ||
+          !isLocation(sourceLocation) ||
+          !isPieceType(pieceType)
+        ) {
+          return;
+        }
+
+        const piece = pieces.find((p) => isEqualCoord(p.location, sourceLocation));
+        const restOfPieces = pieces.filter((p) => p !== piece);
+
+        if (
+          canMove(sourceLocation, destinationLocation, pieceType, pieces) &&
+          piece !== undefined
+        ) {
+          setPieces([{ type: piece.type, location: destinationLocation }, ...restOfPieces]);
+        }
+      },
+    });
+  }, [pieces]);
+
+  return (
+    <div className='flex gap-5'>
+      <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200'>
+        {Object.values(SHAPES).map((shape) => {
+          return <Piece location={null} pieceType={shape.pieceType} pattern={shape.pattern} />;
+        })}
+      </div>
+
+      <div className='flex flex-col items-start'>
+        <div className='flex'>
+          <div className='w-16 h-16'></div>
+          {NUMBERS.map((number) => (
+            <div key={number} className='w-16 h-16 flex items-center justify-center'>
+              {number}
+            </div>
+          ))}
+        </div>
+
+        <div className='flex'>
+          <div>
+            {LETTERS.map((letter) => (
+              <div key={letter} className='w-16 h-16 flex items-center justify-center'>
+                {letter}
+              </div>
+            ))}
+          </div>
+
+          <div className='grid grid-cols-6'>{renderGrid(pieces)}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const pieceLookup: {
   [Key in PieceType]: (location: number[][]) => ReactElement;
@@ -64,50 +135,4 @@ function renderGrid(pieces: PieceRecord[]) {
     }
   }
   return squares;
-}
-
-export default function Board() {
-  const [pieces, setPieces] = useState<PieceRecord[]>([]);
-
-  useEffect(() => {
-    return monitorForElements({
-      onDrop({ source, location }) {
-        const destination = location.current.dropTargets[0];
-        if (!destination) {
-          return;
-        }
-        const destinationLocation = destination.data.location;
-        const sourceLocation = source.data.location;
-        const pieceType = source.data.pieceType;
-
-        if (!isCoord(destinationLocation) || !isCoord(sourceLocation) || !isPieceType(pieceType)) {
-          return;
-        }
-
-        const piece = pieces.find((p) => isEqualCoord(p.location, sourceLocation));
-        const restOfPieces = pieces.filter((p) => p !== piece);
-
-        if (
-          canMove(sourceLocation, destinationLocation, pieceType, pieces) &&
-          piece !== undefined
-        ) {
-          setPieces([{ type: piece.type, location: destinationLocation }, ...restOfPieces]);
-        }
-      },
-    });
-  }, [pieces]);
-
-  return (
-    <div className='flex gap-5'>
-      <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200'>
-        {Object.values(SHAPES).map((shape) => {
-          return <Piece location={null} pieceType={shape.pieceType} pattern={shape.pattern} />;
-        })}
-      </div>
-
-      <div className='grid grid-cols-6 grid-rows-6 border-3 border-gray-300 h-full'>
-        {renderGrid(pieces)}
-      </div>
-    </div>
-  );
 }
