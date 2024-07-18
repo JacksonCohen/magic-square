@@ -57,7 +57,7 @@ export default function Board() {
 
   return (
     <div className='flex gap-5'>
-      <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200'>
+      <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200 h-min'>
         {Object.values(SHAPES).map((shape) => {
           return (
             <Piece
@@ -145,7 +145,7 @@ function renderGrid(placedPieces: PieceRecord[]) {
       const piece = placedPieces.find((piece) => isEqualCoord(piece.location, squareCoord));
 
       squares.push(
-        <Square placedPieces={placedPieces} location={squareCoord}>
+        <Square key={`${row}-${col}`} placedPieces={placedPieces} location={squareCoord}>
           {piece && pieceLookup[piece.pieceType](squareCoord)}
         </Square>
       );
