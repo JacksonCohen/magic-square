@@ -2,9 +2,9 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { type PieceType } from './piece';
-import { canMove, getColor, isCoord, isEqualCoord, isPieceType } from '../utils';
+import { canMove, getColor, isEqualCoord, isLocation, isPieceType } from '../utils';
 
-export type Coords = number[][];
+export type Coords = number[][] | null;
 
 type PieceRecord = {
   type: PieceType;
@@ -13,7 +13,7 @@ type PieceRecord = {
 
 interface SquareProps {
   pieces: PieceRecord[];
-  location: Coords;
+  location: Coords | null;
   children: ReactNode;
 }
 
@@ -31,18 +31,19 @@ export default function Square({ pieces, location, children }: SquareProps) {
       element: el,
       getData: () => ({ location }),
       canDrop: ({ source }) => {
-        if (!isCoord(source.data.location)) {
+        // source represents the piece being dragged
+        if (!isLocation(location)) {
           return false;
         }
 
-        return !isEqualCoord(source.data.location, location);
+        return !isEqualCoord(source.data.location as Coords, location);
       },
       onDragEnter: ({ source }) => {
-        if (!isCoord(source.data.location) || !isPieceType(source.data.pieceType)) {
+        if (!isLocation(location) || !isPieceType(source.data.pieceType)) {
           return;
         }
 
-        if (canMove(source.data.location, location, source.data.pieceType, pieces)) {
+        if (canMove(source.data.location as Coords, location, source.data.pieceType, pieces)) {
           setState('validMove');
         } else {
           setState('invalidMove');
