@@ -50,8 +50,8 @@ const pieceLookup: {
 
 function renderGrid(pieces: PieceRecord[]) {
   const squares = [];
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
+  for (let row = 0; row < 6; row++) {
+    for (let col = 0; col < 6; col++) {
       const squareCoord: Coords = [[row, col]];
 
       const piece = pieces.find((piece) => isEqualCoord(piece.location, squareCoord));
@@ -99,13 +99,13 @@ export default function Board() {
 
   return (
     <div className='flex gap-5'>
-      <div className='flex flex-col gap-3 p-5 border border-gray-200'>
+      <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200'>
         {Object.values(SHAPES).map((shape) => {
           return <Piece location={null} pieceType={shape.pieceType} pattern={shape.pattern} />;
         })}
       </div>
 
-      <div className='grid grid-cols-6 grid-rows-6 w-[500px] h-[500px] border-3 border-gray-300'>
+      <div className='grid grid-cols-6 grid-rows-6 border-3 border-gray-300 h-full'>
         {renderGrid(pieces)}
       </div>
     </div>

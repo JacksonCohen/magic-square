@@ -40,12 +40,12 @@ export default function Piece({ location, pieceType, pattern }: PieceProps) {
       {pattern.map((row, rowIndex) => (
         <div key={rowIndex} className='flex'>
           {row.map((cell, cellIndex) => {
-            if (cell === 0) return <div key={cellIndex} className='w-8 h-8'></div>;
+            if (cell === 0) return <div key={cellIndex} className='w-16 h-16'></div>;
 
             return (
               <div
                 key={cellIndex}
-                className={`${SHAPES[pieceType].color} w-8 h-8 shadow-inner`}
+                className={`${SHAPES[pieceType].color} w-16 h-16 shadow-inner`}
               ></div>
             );
           })}

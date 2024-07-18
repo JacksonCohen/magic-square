@@ -55,7 +55,7 @@ export default function Square({ pieces, location, children }: SquareProps) {
 
   return (
     <div
-      className='flex justify-center items-center w-full h-full shadow-inner'
+      className='flex justify-center items-center w-16 h-16 shadow-inner'
       style={{ backgroundColor: getColor(state) }}
       ref={ref}
     >
