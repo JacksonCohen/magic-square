@@ -2,25 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { preventUnhandled } from '@atlaskit/pragmatic-drag-and-drop/prevent-unhandled';
 import invariant from 'tiny-invariant';
-import { type Coords } from './square';
 import { SHAPES } from '../data';
 
-export interface PieceProps {
-  location: number[][] | null;
-  pieceType: PieceType;
-  pattern: number[][];
-}
+import { type Coords } from './square';
 
 export type PieceType = 'one' | 'two' | 'three' | 'four' | 'square' | 'corner' | 'T' | 'L' | 'Z';
 
 export type PieceRecord = {
-  type: PieceType;
   location: Coords;
+  pieceType: PieceType;
+  pattern: number[][];
 };
 
 // TODO: Add click to rotate (90deg)
 
-export default function Piece({ location, pieceType, pattern }: PieceProps) {
+export default function Piece({ location, pieceType, pattern }: PieceRecord) {
   const ref = useRef(null);
   const [dragging, setDragging] = useState(false);
 
@@ -30,14 +26,14 @@ export default function Piece({ location, pieceType, pattern }: PieceProps) {
 
     return draggable({
       element: el,
-      getInitialData: () => ({ location, pieceType }),
+      getInitialData: () => ({ location, pieceType, pattern }),
       onDragStart: () => {
         preventUnhandled.start();
         setDragging(true);
       },
       onDrop: () => setDragging(false),
     });
-  }, [location, pieceType]);
+  }, [location, pieceType, pattern]);
 
   return (
     <div ref={ref} className={`${dragging ? 'opacity-50' : 'opacity-100'}`}>

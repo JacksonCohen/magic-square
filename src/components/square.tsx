@@ -1,25 +1,22 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { type PieceType } from './piece';
-import { canMove, getColor, isEqualCoord, isLocation, isPieceType } from '../utils';
+import { canMove, getBackgroundColor, isEqualCoord, isLocation, isPieceType } from '../utils';
+
+import { type ReactNode } from 'react';
+import { type PieceRecord } from './piece';
 
 export type Coords = number[][] | null;
 
-type PieceRecord = {
-  type: PieceType;
-  location: Coords;
-};
-
 interface SquareProps {
-  pieces: PieceRecord[];
+  placedPieces: PieceRecord[];
   location: Coords | null;
   children: ReactNode;
 }
 
 export type HoveredState = 'idle' | 'validMove' | 'invalidMove';
 
-export default function Square({ pieces, location, children }: SquareProps) {
+export default function Square({ placedPieces, location, children }: SquareProps) {
   const ref = useRef(null);
   const [state, setState] = useState<HoveredState>('idle');
 
@@ -43,7 +40,7 @@ export default function Square({ pieces, location, children }: SquareProps) {
           return;
         }
 
-        if (canMove(source.data.location as Coords, location, source.data.pieceType, pieces)) {
+        if (canMove(source.data.pattern as Coords, location, placedPieces)) {
           setState('validMove');
         } else {
           setState('invalidMove');
@@ -52,12 +49,13 @@ export default function Square({ pieces, location, children }: SquareProps) {
       onDragLeave: () => setState('idle'),
       onDrop: () => setState('idle'),
     });
-  }, [location, pieces]);
+  }, [location, placedPieces]);
 
   return (
     <div
-      className='flex justify-center items-center w-16 h-16 shadow-inner'
-      style={{ backgroundColor: getColor(state) }}
+      className={`flex justify-center items-center w-16 h-16 shadow-inner ${getBackgroundColor(
+        state
+      )}`}
       ref={ref}
     >
       {children}
