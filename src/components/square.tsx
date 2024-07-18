@@ -42,7 +42,7 @@ export default function Square({ placedPieces, location, children }: SquareProps
 
         if (
           canMove({
-            pattern: source.data.pattern as number[][],
+            pattern: source.data.currentPattern as number[][],
             destination: location as number[][],
             placedPieces,
           })

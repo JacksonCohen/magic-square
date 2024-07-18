@@ -19,7 +19,7 @@ export function isPieceType(value: unknown): value is PieceType {
 
 export function isEqualCoord(c1: Coords, c2: Coords): boolean {
   if (c1 === null && c2 === null)
-    throw new Error('Unexpected Error: Both locations should not be null');
+    throw new Error('Unexpected Error: Both locations cannot be null');
 
   if (c1 === null || c2 === null) return false;
 
