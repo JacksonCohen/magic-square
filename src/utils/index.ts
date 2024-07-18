@@ -26,35 +26,15 @@ export function isEqualCoord(c1: Coords, c2: Coords): boolean {
   return c1[0] === c2[0] && c1[1] === c2[1];
 }
 
-export function canMove(
-  start: Coords,
-  destination: Coords,
-  pieceType: PieceType,
-  pieces: PieceRecord[]
-) {
-  console.log(start);
-  // const rowDist = Math.abs(start[0] - destination[0]);
-  // const colDist = Math.abs(start[1] - destination[1]);
-
-  // if (pieces.find((piece) => isEqualCoord(piece.location, destination))) {
-  //   return false;
-  // }
-
-  switch (pieceType) {
-    // case 'king':
-    // 	return [0, 1].includes(rowDist) && [0, 1].includes(colDist);
-    // case 'pawn':
-    // 	return colDist === 0 && start[0] - destination[0] === -1;
-    default:
-      return true; // TODO: swap back to false
-  }
+export function canMove(pattern: Coords, destination: Coords, placedPieces: PieceRecord[]) {
+  return false;
 }
 
-export function getColor(state: HoveredState): string {
+export function getBackgroundColor(state: HoveredState): string {
   if (state === 'validMove') {
-    return 'lightgreen';
+    return 'bg-green-300';
   } else if (state === 'invalidMove') {
-    return 'pink';
+    return 'bg-red-300';
   }
   return 'white';
 }
