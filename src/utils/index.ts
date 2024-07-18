@@ -26,8 +26,45 @@ export function isEqualCoord(c1: Coords, c2: Coords): boolean {
   return c1[0] === c2[0] && c1[1] === c2[1];
 }
 
-export function canMove(pattern: Coords, destination: Coords, placedPieces: PieceRecord[]) {
-  return false;
+export function canMove({
+  pattern,
+  destination,
+  placedPieces,
+}: {
+  pattern: NonNullable<Coords>;
+  destination: NonNullable<Coords>;
+  placedPieces: PieceRecord[];
+}) {
+  const gridSize = 6;
+
+  const [[startRow, startCol]] = destination;
+
+  // Check bounds
+  for (let row = 0; row < pattern.length; row++) {
+    for (let col = 0; col < pattern[row].length; col++) {
+      // if (pattern[row][col] === 1) {
+      const newRow = startRow + row;
+      const newCol = startCol + col;
+
+      // Check if out of grid bounds
+      if (newRow >= gridSize || newCol >= gridSize || newRow < 0 || newCol < 0) {
+        return false;
+      }
+
+      // Check for collisions with placed pieces
+      if (
+        placedPieces.some((piece) =>
+          piece.location!.some((location) => location[0] === newRow && location[1] === newCol)
+        )
+      ) {
+        return false;
+      }
+    }
+    // }
+  }
+
+  // No collisions or out of bounds, return true
+  return true;
 }
 
 export function getBackgroundColor(state: HoveredState): string {

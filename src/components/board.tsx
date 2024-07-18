@@ -7,7 +7,6 @@ import Square from './square';
 
 import { type ReactElement } from 'react';
 import { type PieceType, type PieceRecord } from './piece';
-import { type Coords } from './square';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -39,7 +38,14 @@ export default function Board() {
         const piece = placedPieces.find((p) => isEqualCoord(p.location, sourceLocation));
         const restOfPieces = placedPieces.filter((p) => p !== piece);
 
-        if (canMove(sourceLocation, destinationLocation, placedPieces) && piece !== undefined) {
+        if (
+          canMove({
+            pattern: sourceLocation as number[][],
+            destination: destinationLocation as number[][],
+            placedPieces,
+          }) &&
+          piece !== undefined
+        ) {
           setPlacedPieces([
             { location: destinationLocation, pieceType: piece.pieceType, pattern: piece.pattern },
             ...restOfPieces,
@@ -53,7 +59,14 @@ export default function Board() {
     <div className='flex gap-5'>
       <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200'>
         {Object.values(SHAPES).map((shape) => {
-          return <Piece location={null} pieceType={shape.pieceType} pattern={shape.pattern} />;
+          return (
+            <Piece
+              key={shape.pieceType}
+              location={null}
+              pieceType={shape.pieceType}
+              pattern={shape.pattern}
+            />
+          );
         })}
       </div>
 
@@ -127,7 +140,7 @@ function renderGrid(placedPieces: PieceRecord[]) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
-      const squareCoord: Coords = [[row, col]];
+      const squareCoord = [[row, col]];
 
       const piece = placedPieces.find((piece) => isEqualCoord(piece.location, squareCoord));
 

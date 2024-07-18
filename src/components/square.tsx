@@ -10,7 +10,7 @@ export type Coords = number[][] | null;
 
 interface SquareProps {
   placedPieces: PieceRecord[];
-  location: Coords | null;
+  location: Coords;
   children: ReactNode;
 }
 
@@ -40,7 +40,13 @@ export default function Square({ placedPieces, location, children }: SquareProps
           return;
         }
 
-        if (canMove(source.data.pattern as Coords, location, placedPieces)) {
+        if (
+          canMove({
+            pattern: source.data.pattern as number[][],
+            destination: location as number[][],
+            placedPieces,
+          })
+        ) {
           setState('validMove');
         } else {
           setState('invalidMove');
