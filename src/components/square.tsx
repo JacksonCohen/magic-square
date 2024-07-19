@@ -12,11 +12,17 @@ interface SquareProps {
   placedPieces: PieceRecord[];
   location: Coords;
   children: ReactNode;
+  highlightedSquares: number[][];
 }
 
 export type HoveredState = 'idle' | 'validMove' | 'invalidMove';
 
-export default function Square({ placedPieces, location, children }: SquareProps) {
+export default function Square({
+  placedPieces,
+  location,
+  children,
+  highlightedSquares,
+}: SquareProps) {
   const ref = useRef(null);
   const [state, setState] = useState<HoveredState>('idle');
 
@@ -57,11 +63,15 @@ export default function Square({ placedPieces, location, children }: SquareProps
     });
   }, [location, placedPieces]);
 
+  const isHighlighted = highlightedSquares.some(
+    ([row, col]) => row === location?.[0][0] && col === location?.[0][1]
+  );
+
   return (
     <div
       className={`flex justify-center items-center w-16 h-16 shadow-inner ${getBackgroundColor(
         state
-      )}`}
+      )} ${isHighlighted ? 'bg-yellow-200' : ''}`}
       ref={ref}
     >
       {children}

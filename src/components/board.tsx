@@ -7,12 +7,14 @@ import Square from './square';
 
 import { type ReactElement } from 'react';
 import { type PieceType, type PieceRecord } from './piece';
+import { type Coords } from './square';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function Board() {
   const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
+  const [highlightedSquares, setHighlightedSquares] = useState<number[][]>([]);
 
   useEffect(() => {
     return monitorForElements({
@@ -22,6 +24,8 @@ export default function Board() {
         if (!destination) {
           return;
         }
+
+        setHighlightedSquares([]);
 
         const destinationLocation = destination.data.location;
         const sourceLocation = source.data.location;
@@ -40,7 +44,7 @@ export default function Board() {
 
         if (
           canMove({
-            pattern: sourceLocation as number[][],
+            pattern: source.data.currentPattern as number[][],
             destination: destinationLocation as number[][],
             placedPieces,
           }) &&
@@ -51,6 +55,45 @@ export default function Board() {
             ...restOfPieces,
           ]);
         }
+
+        setHighlightedSquares([]);
+      },
+      onDrag({ source, location }) {
+        const destination = location.current.dropTargets[0];
+
+        if (!destination) {
+          setHighlightedSquares([]);
+          return;
+        }
+
+        const destinationLocation = destination.data.location;
+        const pieceType = source.data.pieceType;
+
+        if (
+          !isLocation(destinationLocation) ||
+          !isPieceType(pieceType) ||
+          destinationLocation === null
+        ) {
+          setHighlightedSquares([]);
+          return;
+        }
+
+        const pattern = source.data.currentPattern as number[][];
+
+        const highlightSquares: Coords = [];
+
+        pattern.forEach((row, rowIndex) => {
+          row.forEach((cell, colIndex) => {
+            if (cell === 1) {
+              highlightSquares.push([
+                destinationLocation[0][0] + rowIndex,
+                destinationLocation[0][1] + colIndex,
+              ]);
+            }
+          });
+        });
+
+        setHighlightedSquares(highlightSquares);
       },
     });
   }, [placedPieces]);
@@ -89,7 +132,7 @@ export default function Board() {
             ))}
           </div>
 
-          <div className='grid grid-cols-6'>{renderGrid(placedPieces)}</div>
+          <div className='grid grid-cols-6'>{renderGrid(placedPieces, highlightedSquares)}</div>
         </div>
       </div>
     </div>
@@ -136,7 +179,7 @@ const pieceLookup: {
   ),
 };
 
-function renderGrid(placedPieces: PieceRecord[]) {
+function renderGrid(placedPieces: PieceRecord[], highlightedSquares: number[][]) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
@@ -145,7 +188,12 @@ function renderGrid(placedPieces: PieceRecord[]) {
       const piece = placedPieces.find((piece) => isEqualCoord(piece.location, squareCoord));
 
       squares.push(
-        <Square key={`${row}-${col}`} placedPieces={placedPieces} location={squareCoord}>
+        <Square
+          key={`${row}-${col}`}
+          placedPieces={placedPieces}
+          location={squareCoord}
+          highlightedSquares={highlightedSquares}
+        >
           {piece && pieceLookup[piece.pieceType](squareCoord)}
         </Square>
       );
