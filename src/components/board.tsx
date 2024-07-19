@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { canMove, isLocation, isEqualCoord, isPieceType } from '../utils';
+import { isLocation, isEqualCoord, isPieceType } from '../utils';
 import { SHAPES } from '../data';
 import Piece from './piece';
 import Square from './square';
@@ -14,50 +14,12 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function Board() {
   const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
-  const [highlightedSquares, setHighlightedSquares] = useState<number[][]>([]);
+  const [highlightedSquares, setHighlightedSquares] = useState<
+    { coords: Coords; valid: boolean }[]
+  >([]);
 
   useEffect(() => {
     return monitorForElements({
-      onDrop({ source, location }) {
-        const destination = location.current.dropTargets[0];
-
-        if (!destination) {
-          return;
-        }
-
-        setHighlightedSquares([]);
-
-        const destinationLocation = destination.data.location;
-        const sourceLocation = source.data.location;
-        const pieceType = source.data.pieceType;
-
-        if (
-          !isLocation(destinationLocation) ||
-          !isLocation(sourceLocation) ||
-          !isPieceType(pieceType)
-        ) {
-          return;
-        }
-
-        const piece = placedPieces.find((p) => isEqualCoord(p.location, sourceLocation));
-        const restOfPieces = placedPieces.filter((p) => p !== piece);
-
-        if (
-          canMove({
-            pattern: source.data.currentPattern as number[][],
-            destination: destinationLocation as number[][],
-            placedPieces,
-          }) &&
-          piece !== undefined
-        ) {
-          setPlacedPieces([
-            { location: destinationLocation, pieceType: piece.pieceType, pattern: piece.pattern },
-            ...restOfPieces,
-          ]);
-        }
-
-        setHighlightedSquares([]);
-      },
       onDrag({ source, location }) {
         const destination = location.current.dropTargets[0];
 
@@ -79,22 +41,31 @@ export default function Board() {
         }
 
         const pattern = source.data.currentPattern as number[][];
+        const highlightSquares: { coords: Coords; valid: boolean }[] = [];
 
-        const highlightSquares: Coords = [];
+        let valid = true;
+        for (let row = 0; row < pattern.length; row++) {
+          for (let col = 0; col < pattern[row].length; col++) {
+            if (pattern[row][col] === 1) {
+              const coord = [[destinationLocation[0][0] + row, destinationLocation[0][1] + col]];
 
-        pattern.forEach((row, rowIndex) => {
-          row.forEach((cell, colIndex) => {
-            if (cell === 1) {
-              highlightSquares.push([
-                destinationLocation[0][0] + rowIndex,
-                destinationLocation[0][1] + colIndex,
-              ]);
+              if (
+                coord[0][0] < 0 ||
+                coord[0][0] >= 6 ||
+                coord[0][1] < 0 ||
+                coord[0][1] >= 6
+                // placedPieces.some((piece) => isEqualCoord(piece.location, coord))
+              ) {
+                valid = false;
+              }
+              highlightSquares.push({ coords: coord, valid });
             }
-          });
-        });
+          }
+        }
 
-        setHighlightedSquares(highlightSquares);
+        setHighlightedSquares(highlightSquares.map((square) => ({ ...square, valid })));
       },
+      onDrop: () => setHighlightedSquares([]),
     });
   }, [placedPieces]);
 
@@ -179,7 +150,10 @@ const pieceLookup: {
   ),
 };
 
-function renderGrid(placedPieces: PieceRecord[], highlightedSquares: number[][]) {
+function renderGrid(
+  placedPieces: PieceRecord[],
+  highlightedSquares: { coords: Coords; valid: boolean }[]
+) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
