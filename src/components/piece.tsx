@@ -37,7 +37,7 @@ export default function Piece({ location, pieceType, pattern }: PieceRecord) {
   function handleFlip(event: MouseEvent<HTMLDivElement>) {
     event.preventDefault();
 
-    const flippedPattern = pattern.map((row) => row.reverse());
+    const flippedPattern = currentPattern.map((row) => row.reverse());
 
     setCurrentPattern(flippedPattern);
   }

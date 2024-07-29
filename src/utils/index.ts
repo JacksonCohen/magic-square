@@ -1,5 +1,5 @@
 import { type PieceRecord, type PieceType } from '../components/piece';
-import { type HoveredState, type Coords } from '../components/square';
+import { type Coords } from '../components/square';
 
 export function isLocation(token: unknown): token is Coords {
   return (
@@ -65,13 +65,4 @@ export function canMove({
 
   // No collisions or out of bounds, return true
   return true;
-}
-
-export function getBackgroundColor(state: HoveredState): string {
-  if (state === 'validMove') {
-    return 'bg-green-300';
-  } else if (state === 'invalidMove') {
-    return 'bg-red-300';
-  }
-  return 'white';
 }

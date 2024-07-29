@@ -1,25 +1,36 @@
-import { useEffect, useState } from 'react';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { isLocation, isEqualCoord, isPieceType } from '../utils';
+import { useEffect, useState } from 'react';
+import { isLocation, isPieceType, isEqualCoord } from '../utils';
 import { SHAPES } from '../data';
-import Piece from './piece';
 import Square from './square';
+import Piece from './piece';
 
-import { type ReactElement } from 'react';
-import { type PieceType, type PieceRecord } from './piece';
 import { type Coords } from './square';
+import { type PieceType, type PieceRecord } from './piece';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function Board() {
-  const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
+  const [placedPieces] = useState<PieceRecord[]>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<
     { coords: Coords; valid: boolean }[]
   >([]);
+  const [dragOffset, setDragOffset] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
 
   useEffect(() => {
     return monitorForElements({
+      onDragStart({ source, location }) {
+        const { clientX: x, clientY: y } = location.initial.input;
+        const boundingRect = source.element.getBoundingClientRect();
+
+        // Calculate which cell within the pattern the drag started from
+        const cellSize = 64; // pixels
+        const rowOffset = Math.floor((y - boundingRect.top) / cellSize);
+        const colOffset = Math.floor((x - boundingRect.left) / cellSize);
+
+        setDragOffset({ row: rowOffset, col: colOffset });
+      },
       onDrag({ source, location }) {
         const destination = location.current.dropTargets[0];
 
@@ -47,14 +58,19 @@ export default function Board() {
         for (let row = 0; row < pattern.length; row++) {
           for (let col = 0; col < pattern[row].length; col++) {
             if (pattern[row][col] === 1) {
-              const coord = [[destinationLocation[0][0] + row, destinationLocation[0][1] + col]];
+              const coord = [
+                [
+                  destinationLocation[0][0] + row - dragOffset.row,
+                  destinationLocation[0][1] + col - dragOffset.col,
+                ],
+              ];
 
               if (
                 coord[0][0] < 0 ||
                 coord[0][0] >= 6 ||
                 coord[0][1] < 0 ||
-                coord[0][1] >= 6
-                // placedPieces.some((piece) => isEqualCoord(piece.location, coord))
+                coord[0][1] >= 6 ||
+                placedPieces.some((piece) => isEqualCoord(piece.location, coord))
               ) {
                 valid = false;
               }
@@ -63,25 +79,24 @@ export default function Board() {
           }
         }
 
+        // Uniformly apply the validity to all highlighted squares
         setHighlightedSquares(highlightSquares.map((square) => ({ ...square, valid })));
       },
       onDrop: () => setHighlightedSquares([]),
     });
-  }, [placedPieces]);
+  }, [placedPieces, dragOffset]);
 
   return (
     <div className='flex gap-5'>
       <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200 h-min'>
-        {Object.values(SHAPES).map((shape) => {
-          return (
-            <Piece
-              key={shape.pieceType}
-              location={null}
-              pieceType={shape.pieceType}
-              pattern={shape.pattern}
-            />
-          );
-        })}
+        {Object.values(SHAPES).map((shape) => (
+          <Piece
+            key={shape.pieceType}
+            location={null}
+            pieceType={shape.pieceType}
+            pattern={shape.pattern}
+          />
+        ))}
       </div>
 
       <div className='flex flex-col items-start'>
@@ -110,9 +125,7 @@ export default function Board() {
   );
 }
 
-const pieceLookup: {
-  [Key in PieceType]: (location: number[][]) => ReactElement;
-} = {
+const pieceLookup: { [Key in PieceType]: (location: number[][]) => React.ReactElement } = {
   one: (location) => (
     <Piece location={location} pieceType={SHAPES.one.pieceType} pattern={SHAPES.one.pattern} />
   ),
