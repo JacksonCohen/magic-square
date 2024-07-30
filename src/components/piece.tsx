@@ -5,12 +5,12 @@ import invariant from 'tiny-invariant';
 import { SHAPES } from '../data';
 
 import { type MouseEvent } from 'react';
-import { type Coords } from './square';
+import { type Coordinates } from './square';
 
 export type PieceType = 'one' | 'two' | 'three' | 'four' | 'square' | 'corner' | 'T' | 'L' | 'Z';
 
 export type PieceRecord = {
-  location: Coords;
+  location: Coordinates | null;
   pieceType: PieceType;
   pattern: number[][];
 };

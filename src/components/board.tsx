@@ -5,16 +5,20 @@ import { SHAPES } from '../data';
 import Square from './square';
 import Piece from './piece';
 
-import { type Coords } from './square';
-import { type PieceType, type PieceRecord } from './piece';
+import { type Coordinates } from './square';
+import { type PieceRecord } from './piece';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+type PlacedPieceRecord = Omit<PieceRecord, 'location'> & {
+  location: Coordinates[];
+};
+
 export default function Board() {
-  const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
+  const [placedPieces, setPlacedPieces] = useState<PlacedPieceRecord[]>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<
-    { coords: Coords; valid: boolean }[]
+    { coords: Coordinates; valid: boolean }[]
   >([]);
   const [dragOffset, setDragOffset] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
 
@@ -25,7 +29,7 @@ export default function Board() {
         const boundingRect = source.element.getBoundingClientRect();
 
         // Calculate which cell within the pattern the drag started from
-        const cellSize = 64; // pixels
+        const cellSize = 64;
         const rowOffset = Math.floor((y - boundingRect.top) / cellSize);
         const colOffset = Math.floor((x - boundingRect.left) / cellSize);
 
@@ -52,25 +56,25 @@ export default function Board() {
         }
 
         const pattern = source.data.currentPattern as number[][];
-        const highlightSquares: { coords: Coords; valid: boolean }[] = [];
+        const highlightSquares: { coords: Coordinates; valid: boolean }[] = [];
 
         let valid = true;
         for (let row = 0; row < pattern.length; row++) {
           for (let col = 0; col < pattern[row].length; col++) {
             if (pattern[row][col] === 1) {
               const coord = [
-                [
-                  destinationLocation[0][0] + row - dragOffset.row,
-                  destinationLocation[0][1] + col - dragOffset.col,
-                ],
+                destinationLocation[0] + row - dragOffset.row,
+                destinationLocation[1] + col - dragOffset.col,
               ];
 
               if (
-                coord[0][0] < 0 ||
-                coord[0][0] >= 6 ||
-                coord[0][1] < 0 ||
-                coord[0][1] >= 6 ||
-                placedPieces.some((piece) => isEqualCoord(piece.location, coord))
+                coord[0] < 0 ||
+                coord[0] >= 6 ||
+                coord[1] < 0 ||
+                coord[1] >= 6 ||
+                placedPieces.some((piece) =>
+                  piece.location.some((location) => isEqualCoord(location, coord))
+                )
               ) {
                 valid = false;
               }
@@ -91,26 +95,27 @@ export default function Board() {
         }
 
         const pattern = source.data.currentPattern as number[][];
-        const newPiece: PieceRecord = {
-          pieceType,
-          location: pattern
-            .map((row, rowIndex) =>
-              row.map((cell, colIndex) => {
-                if (destinationLocation === null) return;
+        const pieceLocation = pattern
+          .map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+              if (cell === 1) {
+                return [
+                  destinationLocation[0] + rowIndex - dragOffset.row,
+                  destinationLocation[1] + colIndex - dragOffset.col,
+                ];
+              }
 
-                if (cell === 1) {
-                  return [
-                    destinationLocation[0][0] + rowIndex - dragOffset.row,
-                    destinationLocation[0][1] + colIndex - dragOffset.col,
-                  ];
-                }
-                return [-1, -1]; // Placeholder for non-active parts
-              })
-            )
-            .flat()
-            .filter((coord) => {
-              return coord?.[0] !== -1 && coord?.[1] !== -1;
-            }) as Coords,
+              return [-1, -1]; // Placeholder for non-active parts
+            })
+          )
+          .flat()
+          .filter((coord) => {
+            return coord?.[0] !== -1 && coord?.[1] !== -1;
+          });
+
+        const newPiece = {
+          pieceType,
+          location: pieceLocation,
           pattern,
         };
 
@@ -163,57 +168,57 @@ export default function Board() {
   );
 }
 
-const pieceLookup: { [Key in PieceType]: (location: number[][]) => React.ReactElement } = {
-  one: (location) => (
-    <Piece location={location} pieceType={SHAPES.one.pieceType} pattern={SHAPES.one.pattern} />
-  ),
-  two: (location) => (
-    <Piece location={location} pieceType={SHAPES.two.pieceType} pattern={SHAPES.two.pattern} />
-  ),
-  three: (location) => (
-    <Piece location={location} pieceType={SHAPES.three.pieceType} pattern={SHAPES.three.pattern} />
-  ),
-  four: (location) => (
-    <Piece location={location} pieceType={SHAPES.four.pieceType} pattern={SHAPES.four.pattern} />
-  ),
-  square: (location) => (
-    <Piece
-      location={location}
-      pieceType={SHAPES.square.pieceType}
-      pattern={SHAPES.square.pattern}
-    />
-  ),
-  corner: (location) => (
-    <Piece
-      location={location}
-      pieceType={SHAPES.corner.pieceType}
-      pattern={SHAPES.corner.pattern}
-    />
-  ),
-  T: (location) => (
-    <Piece location={location} pieceType={SHAPES.T.pieceType} pattern={SHAPES.T.pattern} />
-  ),
-  L: (location) => (
-    <Piece location={location} pieceType={SHAPES.L.pieceType} pattern={SHAPES.L.pattern} />
-  ),
-  Z: (location) => (
-    <Piece location={location} pieceType={SHAPES.Z.pieceType} pattern={SHAPES.Z.pattern} />
-  ),
-};
+// const pieceLookup: { [Key in PieceType]: (location: number[][]) => React.ReactElement } = {
+//   one: (location) => (
+//     <Piece location={location} pieceType={SHAPES.one.pieceType} pattern={SHAPES.one.pattern} />
+//   ),
+//   two: (location) => (
+//     <Piece location={location} pieceType={SHAPES.two.pieceType} pattern={SHAPES.two.pattern} />
+//   ),
+//   three: (location) => (
+//     <Piece location={location} pieceType={SHAPES.three.pieceType} pattern={SHAPES.three.pattern} />
+//   ),
+//   four: (location) => (
+//     <Piece location={location} pieceType={SHAPES.four.pieceType} pattern={SHAPES.four.pattern} />
+//   ),
+//   square: (location) => (
+//     <Piece
+//       location={location}
+//       pieceType={SHAPES.square.pieceType}
+//       pattern={SHAPES.square.pattern}
+//     />
+//   ),
+//   corner: (location) => (
+//     <Piece
+//       location={location}
+//       pieceType={SHAPES.corner.pieceType}
+//       pattern={SHAPES.corner.pattern}
+//     />
+//   ),
+//   T: (location) => (
+//     <Piece location={location} pieceType={SHAPES.T.pieceType} pattern={SHAPES.T.pattern} />
+//   ),
+//   L: (location) => (
+//     <Piece location={location} pieceType={SHAPES.L.pieceType} pattern={SHAPES.L.pattern} />
+//   ),
+//   Z: (location) => (
+//     <Piece location={location} pieceType={SHAPES.Z.pieceType} pattern={SHAPES.Z.pattern} />
+//   ),
+// };
 
 function renderGrid(
-  placedPieces: PieceRecord[],
-  highlightedSquares: { coords: Coords; valid: boolean }[]
+  placedPieces: PlacedPieceRecord[],
+  highlightedSquares: { coords: Coordinates; valid: boolean }[]
 ) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
-      const squareCoord = [[row, col]];
+      const squareCoord = [row, col];
 
       const piece = placedPieces.find((piece) => {
         if (piece.location === null) return;
 
-        return piece.location.some((coord) => isEqualCoord([coord], squareCoord));
+        return piece.location.some((coord) => isEqualCoord(coord, squareCoord));
       });
 
       squares.push(
@@ -222,7 +227,8 @@ function renderGrid(
           location={squareCoord}
           highlightedSquares={highlightedSquares}
         >
-          {piece && pieceLookup[piece.pieceType](squareCoord)}
+          {piece && <div>piece</div>}
+          {/* {piece && pieceLookup[piece.pieceType](squareCoord)} */}
         </Square>
       );
     }

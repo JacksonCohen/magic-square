@@ -4,12 +4,12 @@ import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element
 
 import { type ReactNode } from 'react';
 
-export type Coords = number[][] | null; // TODO: Remove null and update name
+export type Coordinates = number[];
 
 interface SquareProps {
-  location: Coords;
+  location: Coordinates;
   children: ReactNode;
-  highlightedSquares: { coords: Coords; valid: boolean }[];
+  highlightedSquares: { coords: Coordinates; valid: boolean }[];
 }
 
 export type HoveredState = 'idle' | 'validMove' | 'invalidMove';
@@ -18,8 +18,7 @@ export default function Square({ location, children, highlightedSquares }: Squar
   const ref = useRef(null);
 
   const isHighlighted = highlightedSquares.some(
-    (highlight) =>
-      highlight.coords?.[0][0] === location?.[0][0] && highlight.coords?.[0][1] === location?.[0][1]
+    (highlight) => highlight.coords[0] === location[0] && highlight.coords[1] === location[1]
   );
   const validHighlight = highlightedSquares.length > 0 ? highlightedSquares[0].valid : true;
   const highlightClass = isHighlighted ? (validHighlight ? ' bg-green-300' : ' bg-red-300') : '';
