@@ -12,7 +12,7 @@ const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function Board() {
-  const [placedPieces] = useState<PieceRecord[]>([]);
+  const [placedPieces, setPlacedPieces] = useState<PieceRecord[]>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<
     { coords: Coords; valid: boolean }[]
   >([]);
@@ -79,17 +79,55 @@ export default function Board() {
           }
         }
 
-        // Uniformly apply the validity to all highlighted squares
         setHighlightedSquares(highlightSquares.map((square) => ({ ...square, valid })));
       },
-      onDrop: () => setHighlightedSquares([]),
+      onDrop({ source, location }) {
+        const destination = location.current.dropTargets[0];
+        const destinationLocation = destination?.data.location;
+        const pieceType = source.data.pieceType;
+
+        if (!isLocation(destinationLocation) || !isPieceType(pieceType)) {
+          return;
+        }
+
+        const pattern = source.data.currentPattern as number[][];
+        const newPiece: PieceRecord = {
+          pieceType,
+          location: pattern
+            .map((row, rowIndex) =>
+              row.map((cell, colIndex) => {
+                if (destinationLocation === null) return;
+
+                if (cell === 1) {
+                  return [
+                    destinationLocation[0][0] + rowIndex - dragOffset.row,
+                    destinationLocation[0][1] + colIndex - dragOffset.col,
+                  ];
+                }
+                return [-1, -1]; // Placeholder for non-active parts
+              })
+            )
+            .flat()
+            .filter((coord) => {
+              return coord?.[0] !== -1 && coord?.[1] !== -1;
+            }) as Coords,
+          pattern,
+        };
+
+        setPlacedPieces((prev) => [...prev, newPiece]);
+        setHighlightedSquares([]);
+      },
     });
   }, [placedPieces, dragOffset]);
+
+  const renderPieces = Object.values(SHAPES).filter(
+    (shape) => !placedPieces.some((p) => p.pieceType === shape.pieceType)
+  );
 
   return (
     <div className='flex gap-5'>
       <div className='flex max-w-[525px] gap-3 flex-wrap p-5 border border-gray-200 h-min'>
-        {Object.values(SHAPES).map((shape) => (
+        {renderPieces.map((shape) => (
           <Piece
             key={shape.pieceType}
             location={null}
@@ -172,12 +210,15 @@ function renderGrid(
     for (let col = 0; col < 6; col++) {
       const squareCoord = [[row, col]];
 
-      const piece = placedPieces.find((piece) => isEqualCoord(piece.location, squareCoord));
+      const piece = placedPieces.find((piece) => {
+        if (piece.location === null) return;
+
+        return piece.location.some((coord) => isEqualCoord([coord], squareCoord));
+      });
 
       squares.push(
         <Square
           key={`${row}-${col}`}
-          placedPieces={placedPieces}
           location={squareCoord}
           highlightedSquares={highlightedSquares}
         >

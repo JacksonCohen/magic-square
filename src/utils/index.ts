@@ -18,12 +18,13 @@ export function isPieceType(value: unknown): value is PieceType {
 }
 
 export function isEqualCoord(c1: Coords, c2: Coords): boolean {
+  // TODO: Refactor this function
   if (c1 === null && c2 === null)
     throw new Error('Unexpected Error: Both locations cannot be null');
 
   if (c1 === null || c2 === null) return false;
 
-  return c1[0] === c2[0] && c1[1] === c2[1];
+  return c1[0][0] === c2[0][0] && c1[0][1] === c2[0][1];
 }
 
 export function canMove({
