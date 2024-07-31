@@ -96,7 +96,7 @@ export default function Board() {
 
         const pattern = source.data.currentPattern as number[][];
         const pieceLocation = pattern
-          .map((row, rowIndex) =>
+          .flatMap((row, rowIndex) =>
             row.map((cell, colIndex) => {
               if (cell === 1) {
                 return [
@@ -108,7 +108,6 @@ export default function Board() {
               return [-1, -1]; // Placeholder for non-active parts
             })
           )
-          .flat()
           .filter((coord) => {
             return coord?.[0] !== -1 && coord?.[1] !== -1;
           });
@@ -168,44 +167,6 @@ export default function Board() {
   );
 }
 
-// const pieceLookup: { [Key in PieceType]: (location: number[][]) => React.ReactElement } = {
-//   one: (location) => (
-//     <Piece location={location} pieceType={SHAPES.one.pieceType} pattern={SHAPES.one.pattern} />
-//   ),
-//   two: (location) => (
-//     <Piece location={location} pieceType={SHAPES.two.pieceType} pattern={SHAPES.two.pattern} />
-//   ),
-//   three: (location) => (
-//     <Piece location={location} pieceType={SHAPES.three.pieceType} pattern={SHAPES.three.pattern} />
-//   ),
-//   four: (location) => (
-//     <Piece location={location} pieceType={SHAPES.four.pieceType} pattern={SHAPES.four.pattern} />
-//   ),
-//   square: (location) => (
-//     <Piece
-//       location={location}
-//       pieceType={SHAPES.square.pieceType}
-//       pattern={SHAPES.square.pattern}
-//     />
-//   ),
-//   corner: (location) => (
-//     <Piece
-//       location={location}
-//       pieceType={SHAPES.corner.pieceType}
-//       pattern={SHAPES.corner.pattern}
-//     />
-//   ),
-//   T: (location) => (
-//     <Piece location={location} pieceType={SHAPES.T.pieceType} pattern={SHAPES.T.pattern} />
-//   ),
-//   L: (location) => (
-//     <Piece location={location} pieceType={SHAPES.L.pieceType} pattern={SHAPES.L.pattern} />
-//   ),
-//   Z: (location) => (
-//     <Piece location={location} pieceType={SHAPES.Z.pieceType} pattern={SHAPES.Z.pattern} />
-//   ),
-// };
-
 function renderGrid(
   placedPieces: PlacedPieceRecord[],
   highlightedSquares: { coords: Coordinates; valid: boolean }[]
@@ -215,11 +176,9 @@ function renderGrid(
     for (let col = 0; col < 6; col++) {
       const squareCoord = [row, col];
 
-      const piece = placedPieces.find((piece) => {
-        if (piece.location === null) return;
-
-        return piece.location.some((coord) => isEqualCoord(coord, squareCoord));
-      });
+      const piece = placedPieces.find((piece) =>
+        piece.location.some((coord) => isEqualCoord(coord, squareCoord))
+      );
 
       squares.push(
         <Square
@@ -227,8 +186,7 @@ function renderGrid(
           location={squareCoord}
           highlightedSquares={highlightedSquares}
         >
-          {piece && <div>piece</div>}
-          {/* {piece && pieceLookup[piece.pieceType](squareCoord)} */}
+          {piece && <div className={`${SHAPES[piece.pieceType].color} w-16 h-16 shadow-inner`} />}
         </Square>
       );
     }

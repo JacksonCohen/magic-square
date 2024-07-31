@@ -12,8 +12,6 @@ interface SquareProps {
   highlightedSquares: { coords: Coordinates; valid: boolean }[];
 }
 
-export type HoveredState = 'idle' | 'validMove' | 'invalidMove';
-
 export default function Square({ location, children, highlightedSquares }: SquareProps) {
   const ref = useRef(null);
 
