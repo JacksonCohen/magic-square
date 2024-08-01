@@ -5,17 +5,23 @@ import { SHAPES } from '../data';
 import Square from './square';
 import Piece from './piece';
 
+import { type GameStatus } from '../game';
 import { type Coordinates } from './square';
 import { type PieceRecord } from './piece';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-type PlacedPieceRecord = Omit<PieceRecord, 'location'> & {
+type PlacedPieceRecord = Omit<PieceRecord, 'location' | 'isDraggable'> & {
   location: Coordinates[];
 };
 
-export default function Board() {
+interface BoardProps {
+  gameStatus: GameStatus;
+  pegs: Coordinates[];
+}
+
+export default function Board({ gameStatus, pegs }: BoardProps) {
   const [placedPieces, setPlacedPieces] = useState<PlacedPieceRecord[]>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<
     { coords: Coordinates; valid: boolean }[]
@@ -28,7 +34,6 @@ export default function Board() {
         const { clientX: x, clientY: y } = location.initial.input;
         const boundingRect = source.element.getBoundingClientRect();
 
-        // Calculate which cell within the pattern the drag started from
         const cellSize = 64;
         const rowOffset = Math.floor((y - boundingRect.top) / cellSize);
         const colOffset = Math.floor((x - boundingRect.left) / cellSize);
@@ -74,7 +79,8 @@ export default function Board() {
                 coord[1] >= 6 ||
                 placedPieces.some((piece) =>
                   piece.location.some((location) => isEqualCoord(location, coord))
-                )
+                ) ||
+                pegs.some((peg) => isEqualCoord(peg, coord)) // Check if peg is at this location
               ) {
                 valid = false;
               }
@@ -122,7 +128,7 @@ export default function Board() {
         setHighlightedSquares([]);
       },
     });
-  }, [placedPieces, dragOffset]);
+  }, [placedPieces, dragOffset, pegs]);
 
   const renderPieces = Object.values(SHAPES).filter(
     (shape) => !placedPieces.some((p) => p.pieceType === shape.pieceType)
@@ -134,6 +140,7 @@ export default function Board() {
         {renderPieces.map((shape) => (
           <Piece
             key={shape.pieceType}
+            isDraggable={gameStatus === 'active'}
             location={null}
             pieceType={shape.pieceType}
             pattern={shape.pattern}
@@ -160,7 +167,9 @@ export default function Board() {
             ))}
           </div>
 
-          <div className='grid grid-cols-6'>{renderGrid(placedPieces, highlightedSquares)}</div>
+          <div className='grid grid-cols-6'>
+            {renderGrid(placedPieces, highlightedSquares, pegs)}
+          </div>
         </div>
       </div>
     </div>
@@ -169,16 +178,20 @@ export default function Board() {
 
 function renderGrid(
   placedPieces: PlacedPieceRecord[],
-  highlightedSquares: { coords: Coordinates; valid: boolean }[]
+  highlightedSquares: { coords: Coordinates; valid: boolean }[],
+  pegs: Coordinates[]
 ) {
   const squares = [];
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 6; col++) {
       const squareCoord = [row, col];
 
-      const piece = placedPieces.find((piece) =>
-        piece.location.some((coord) => isEqualCoord(coord, squareCoord))
-      );
+      const piece = placedPieces.find((piece) => {
+        if (piece.location === null) return false;
+        return piece.location.some((coord) => isEqualCoord(coord, squareCoord));
+      });
+
+      const isPeg = pegs.some((peg) => isEqualCoord(peg, squareCoord));
 
       squares.push(
         <Square
@@ -186,7 +199,10 @@ function renderGrid(
           location={squareCoord}
           highlightedSquares={highlightedSquares}
         >
-          {piece && <div className={`${SHAPES[piece.pieceType].color} w-16 h-16 shadow-inner`} />}
+          {isPeg && <div className='bg-[#414a4c] w-16 h-16 shadow-inner'></div>}
+          {piece && (
+            <div className={`${SHAPES[piece.pieceType].color} w-16 h-16 shadow-inner`}></div>
+          )}
         </Square>
       );
     }

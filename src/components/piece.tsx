@@ -10,12 +10,13 @@ import { type Coordinates } from './square';
 export type PieceType = 'one' | 'two' | 'three' | 'four' | 'square' | 'corner' | 'T' | 'L' | 'Z';
 
 export type PieceRecord = {
+  isDraggable: boolean;
   location: Coordinates | null;
   pieceType: PieceType;
   pattern: number[][];
 };
 
-export default function Piece({ location, pieceType, pattern }: PieceRecord) {
+export default function Piece({ isDraggable, location, pieceType, pattern }: PieceRecord) {
   const ref = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [currentPattern, setCurrentPattern] = useState(pattern);
@@ -43,6 +44,8 @@ export default function Piece({ location, pieceType, pattern }: PieceRecord) {
   }
 
   useEffect(() => {
+    if (!isDraggable) return;
+
     const el = ref.current;
     invariant(el);
 
@@ -55,7 +58,7 @@ export default function Piece({ location, pieceType, pattern }: PieceRecord) {
       },
       onDrop: () => setDragging(false),
     });
-  }, [location, pieceType, currentPattern]);
+  }, [isDraggable, location, pieceType, currentPattern]);
 
   return (
     <div

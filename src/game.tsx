@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import Board from './components/board';
 import Timer from './components/timer';
+import { rollDice } from './utils';
 import './index.css';
 
-type GameState = 'ready' | 'active' | 'completed';
+export type GameStatus = 'ready' | 'active' | 'completed';
 
 export default function Game() {
-  const [gameState, setGameState] = useState<GameState>('ready');
+  const [gameStatus, setGameStatus] = useState<GameStatus>('ready');
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [pegs, setPegs] = useState<number[][]>([]);
 
   const handleStartGame = () => {
-    setGameState('active');
+    const pegCoordinates = rollDice();
+
     setStartTime(Date.now());
+    setGameStatus('active');
+    setPegs(pegCoordinates);
   };
 
   return (
@@ -21,16 +26,20 @@ export default function Game() {
         <Timer startTime={startTime} />
       </div>
 
-      {gameState === 'ready' && (
-        <button
-          onClick={handleStartGame}
-          className='max-w-32 mt-4 p-2 bg-blue-500 text-white rounded'
-        >
-          Start Game
-        </button>
-      )}
+      <div className='flex justify-center'>
+        {gameStatus === 'ready' ? (
+          <button
+            onClick={handleStartGame}
+            className='max-w-32 mt-4 p-2 bg-blue-500 text-white rounded'
+          >
+            Start Game
+          </button>
+        ) : (
+          <div className='h-14' />
+        )}
+      </div>
 
-      <Board />
+      <Board gameStatus={gameStatus} pegs={pegs} />
     </div>
   );
 }
