@@ -1,6 +1,6 @@
-import { type PieceType } from '../components/piece';
-import { type Coordinates } from '../components/square';
 import { DICE_COORDINATES } from '../data';
+
+import { type Coordinates, type PieceType } from '../types';
 
 export function isLocation(token: unknown): token is Coordinates {
   return (
@@ -42,4 +42,14 @@ export function rollDice() {
   ];
 
   return rolledDice;
+}
+
+export function formatTime(seconds: number) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
+    .toString()
+    .padStart(2, '0')}`;
 }

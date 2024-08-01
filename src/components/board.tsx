@@ -13,10 +13,16 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 interface BoardProps {
   isGameActive: boolean;
   pegs: Coordinates[];
+  placedPieces: PlacedPieceRecord[];
+  handlePiecePlacement: (piece: PlacedPieceRecord) => void;
 }
 
-export default function Board({ isGameActive, pegs }: BoardProps) {
-  const [placedPieces, setPlacedPieces] = useState<PlacedPieceRecord[]>([]);
+export default function Board({
+  isGameActive,
+  pegs,
+  placedPieces,
+  handlePiecePlacement,
+}: BoardProps) {
   const [highlightedSquares, setHighlightedSquares] = useState<
     { coords: Coordinates; valid: boolean }[]
   >([]);
@@ -136,11 +142,11 @@ export default function Board({ isGameActive, pegs }: BoardProps) {
           pattern,
         };
 
-        setPlacedPieces((prev) => [...prev, newPiece]);
+        handlePiecePlacement(newPiece);
         setHighlightedSquares([]);
       },
     });
-  }, [isGameActive, placedPieces, dragOffset, pegs]);
+  }, [isGameActive, handlePiecePlacement, placedPieces, dragOffset, pegs]);
 
   const renderPieces = Object.values(SHAPES).filter(
     (shape) => !placedPieces.some((p) => p.pieceType === shape.pieceType)
