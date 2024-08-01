@@ -118,6 +118,24 @@ export default function Board({ gameStatus, pegs }: BoardProps) {
             return coord?.[0] !== -1 && coord?.[1] !== -1;
           });
 
+        const canPlacePiece = pieceLocation.every((coord) => {
+          return (
+            coord[0] >= 0 &&
+            coord[0] < 6 &&
+            coord[1] >= 0 &&
+            coord[1] < 6 &&
+            !placedPieces.some((piece) =>
+              piece.location.some((location) => isEqualCoord(location, coord))
+            ) &&
+            !pegs.some((peg) => isEqualCoord(peg, coord))
+          );
+        });
+
+        if (!canPlacePiece) {
+          setHighlightedSquares([]);
+          return;
+        }
+
         const newPiece = {
           pieceType,
           location: pieceLocation,
@@ -199,10 +217,8 @@ function renderGrid(
           location={squareCoord}
           highlightedSquares={highlightedSquares}
         >
-          {isPeg && <div className='bg-[#414a4c] w-16 h-16 shadow-inner'></div>}
-          {piece && (
-            <div className={`${SHAPES[piece.pieceType].color} w-16 h-16 shadow-inner`}></div>
-          )}
+          {isPeg && <div className='bg-peg w-16 h-16 shadow-inner' />}
+          {piece && <div className={`${SHAPES[piece.pieceType].color} w-16 h-16 shadow-inner`} />}
         </Square>
       );
     }
