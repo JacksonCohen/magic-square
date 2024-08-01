@@ -1,12 +1,4 @@
-import { type PieceType } from './components/piece';
-
-type Shape = {
-  [key in PieceType]: {
-    pieceType: PieceType;
-    pattern: number[][];
-    color: string;
-  };
-};
+import { type Shape } from './types';
 
 export const SHAPES: Shape = {
   one: {

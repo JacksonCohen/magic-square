@@ -5,18 +5,9 @@ import invariant from 'tiny-invariant';
 import { SHAPES } from '../data';
 
 import { type MouseEvent } from 'react';
-import { type Coordinates } from './square';
+import { type PieceRecord } from '../types';
 
-export type PieceType = 'one' | 'two' | 'three' | 'four' | 'square' | 'corner' | 'T' | 'L' | 'Z';
-
-export type PieceRecord = {
-  isDraggable: boolean;
-  location: Coordinates | null;
-  pieceType: PieceType;
-  pattern: number[][];
-};
-
-export default function Piece({ isDraggable, location, pieceType, pattern }: PieceRecord) {
+export default function Piece({ isGameActive, location, pieceType, pattern }: PieceRecord) {
   const ref = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [currentPattern, setCurrentPattern] = useState(pattern);
@@ -44,7 +35,7 @@ export default function Piece({ isDraggable, location, pieceType, pattern }: Pie
   }
 
   useEffect(() => {
-    if (!isDraggable) return;
+    if (!isGameActive === false) return;
 
     const el = ref.current;
     invariant(el);
@@ -58,7 +49,7 @@ export default function Piece({ isDraggable, location, pieceType, pattern }: Pie
       },
       onDrop: () => setDragging(false),
     });
-  }, [isDraggable, location, pieceType, currentPattern]);
+  }, [isGameActive, location, pieceType, currentPattern]);
 
   return (
     <div
