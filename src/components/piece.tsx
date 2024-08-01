@@ -13,6 +13,8 @@ export default function Piece({ isGameActive, location, pieceType, pattern }: Pi
   const [currentPattern, setCurrentPattern] = useState(pattern);
 
   function handleRotate() {
+    if (isGameActive === false) return;
+
     const numRows = currentPattern.length;
     const numCols = currentPattern[0].length;
     const rotatedPattern = Array.from({ length: numCols }, () => Array(numRows).fill(0));
@@ -27,6 +29,8 @@ export default function Piece({ isGameActive, location, pieceType, pattern }: Pi
   }
 
   function handleFlip(event: MouseEvent<HTMLDivElement>) {
+    if (isGameActive === false) return;
+
     event.preventDefault();
 
     const flippedPattern = currentPattern.map((row) => row.reverse());
