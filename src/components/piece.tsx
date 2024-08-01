@@ -39,7 +39,7 @@ export default function Piece({ isGameActive, location, pieceType, pattern }: Pi
   }
 
   useEffect(() => {
-    if (!isGameActive === false) return;
+    if (isGameActive === false) return;
 
     const el = ref.current;
     invariant(el);

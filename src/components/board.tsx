@@ -5,23 +5,17 @@ import { SHAPES } from '../data';
 import Square from './square';
 import Piece from './piece';
 
-import { type GameStatus } from '../game';
-import { type Coordinates } from './square';
-import { type PieceRecord } from './piece';
+import { type PlacedPieceRecord, type Coordinates } from '../types';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-type PlacedPieceRecord = Omit<PieceRecord, 'location' | 'isDraggable'> & {
-  location: Coordinates[];
-};
-
 interface BoardProps {
-  gameStatus: GameStatus;
+  isGameActive: boolean;
   pegs: Coordinates[];
 }
 
-export default function Board({ gameStatus, pegs }: BoardProps) {
+export default function Board({ isGameActive, pegs }: BoardProps) {
   const [placedPieces, setPlacedPieces] = useState<PlacedPieceRecord[]>([]);
   const [highlightedSquares, setHighlightedSquares] = useState<
     { coords: Coordinates; valid: boolean }[]
@@ -146,7 +140,7 @@ export default function Board({ gameStatus, pegs }: BoardProps) {
         setHighlightedSquares([]);
       },
     });
-  }, [placedPieces, dragOffset, pegs]);
+  }, [isGameActive, placedPieces, dragOffset, pegs]);
 
   const renderPieces = Object.values(SHAPES).filter(
     (shape) => !placedPieces.some((p) => p.pieceType === shape.pieceType)
@@ -158,7 +152,7 @@ export default function Board({ gameStatus, pegs }: BoardProps) {
         {renderPieces.map((shape) => (
           <Piece
             key={shape.pieceType}
-            isDraggable={gameStatus === 'active'}
+            isGameActive={isGameActive}
             location={null}
             pieceType={shape.pieceType}
             pattern={shape.pattern}

@@ -3,8 +3,7 @@ import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 import { type ReactNode } from 'react';
-
-export type Coordinates = number[];
+import { type Coordinates } from '../types';
 
 interface SquareProps {
   location: Coordinates;
