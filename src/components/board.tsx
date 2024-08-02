@@ -5,7 +5,7 @@ import { SHAPES } from '../data';
 import Square from './square';
 import Piece from './piece';
 
-import { type PlacedPieceRecord, type Coordinates } from '../types';
+import { type PlacedPieceRecord, type Coordinates, type SquareHighlight } from '../types';
 
 const NUMBERS = [1, 2, 3, 4, 5, 6];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -23,9 +23,7 @@ export default function Board({
   placedPieces,
   handlePiecePlacement,
 }: BoardProps) {
-  const [highlightedSquares, setHighlightedSquares] = useState<
-    { coords: Coordinates; valid: boolean }[]
-  >([]);
+  const [highlightedSquares, setHighlightedSquares] = useState<SquareHighlight[]>([]);
   const [dragOffset, setDragOffset] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
 
   useEffect(() => {
@@ -61,7 +59,7 @@ export default function Board({
         }
 
         const pattern = source.data.currentPattern as number[][];
-        const highlightSquares: { coords: Coordinates; valid: boolean }[] = [];
+        const highlightSquares: SquareHighlight[] = [];
 
         let valid = true;
         for (let row = 0; row < pattern.length; row++) {
@@ -170,7 +168,7 @@ export default function Board({
         <div className='flex'>
           <div className='w-16 h-16'></div>
           {NUMBERS.map((number) => (
-            <div key={number} className='w-16 h-16 flex items-center justify-center'>
+            <div key={number} className='w-16 h-16 flex items-center justify-center select-none'>
               {number}
             </div>
           ))}
@@ -179,7 +177,7 @@ export default function Board({
         <div className='flex'>
           <div>
             {LETTERS.map((letter) => (
-              <div key={letter} className='w-16 h-16 flex items-center justify-center'>
+              <div key={letter} className='w-16 h-16 flex items-center justify-center select-none'>
                 {letter}
               </div>
             ))}
@@ -196,7 +194,7 @@ export default function Board({
 
 function renderGrid(
   placedPieces: PlacedPieceRecord[],
-  highlightedSquares: { coords: Coordinates; valid: boolean }[],
+  highlightedSquares: SquareHighlight[],
   pegs: Coordinates[]
 ) {
   const squares = [];

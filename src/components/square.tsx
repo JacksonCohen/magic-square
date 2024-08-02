@@ -3,12 +3,12 @@ import invariant from 'tiny-invariant';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 import { type ReactNode } from 'react';
-import { type Coordinates } from '../types';
+import { type SquareHighlight, type Coordinates } from '../types';
 
 interface SquareProps {
   location: Coordinates;
   children: ReactNode;
-  highlightedSquares: { coords: Coordinates; valid: boolean }[];
+  highlightedSquares: SquareHighlight[];
 }
 
 export default function Square({ location, children, highlightedSquares }: SquareProps) {

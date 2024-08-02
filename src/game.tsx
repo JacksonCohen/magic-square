@@ -9,9 +9,9 @@ import { type PlacedPieceRecord, type GameStatus } from './types';
 export default function Game() {
   const [gameStatus, setGameStatus] = useState<GameStatus>('ready');
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [pegs, setPegs] = useState<number[][]>([]);
   const [placedPieces, setPlacedPieces] = useState<PlacedPieceRecord[]>([]);
-  const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
     if (!startTime || gameStatus !== 'active') return;
