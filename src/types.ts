@@ -19,6 +19,8 @@ export type PlacedPieceRecord = Omit<PieceRecord, 'location' | 'isGameActive'> &
   location: Coordinates[];
 };
 
+export type SquareHighlight = { coords: Coordinates; valid: boolean };
+
 export type Coordinates = number[];
 
 export type GameStatus = 'ready' | 'active' | 'completed';
